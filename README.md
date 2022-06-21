@@ -7,7 +7,7 @@ The instructions in this repostitory assume running locally on an amd64/x86-64 b
 First the `open-liberty:beta-checkpoint-ubi` image needs to be built.  Once the `open-liberty:beta-checkpoint-ubi` image is built it can be used to containerize and checkpoint an application with Open Liberty.  The `open-liberty:beta-checkpoint-ubi` image, once built, contains all the prerequisites required for doing a checkpoint and restore of the application.  This includes the following:
 1. A version of `criu` that supports an unprivileged user
 2. A version of [OpenJ9](https://github.com/eclipse-openj9/openj9) that supports checkpointing the JVM
-3. A version of [Open Liberty]([Open Liberty](https://github.com/OpenLiberty/open-liberty)) that supports checkpointing a Liberty server configuraiton
+3. A version of [Open Liberty](https://github.com/OpenLiberty/open-liberty) that supports checkpointing a Liberty server configuraiton
 
 Currently OpenJ9 builds that support checkpointing the JVM are x86-64 only, therefore the only `open-liberty:beta-checkpoint-ubi` image that can currently be built is x86-64 only.  The instructions here also only produce a UBI based image.  It is possible that an Ubuntu image could be produced, but the UBI based images are the focus first.
 
