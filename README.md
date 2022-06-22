@@ -22,6 +22,24 @@ After the `open-liberty:beta-checkpoint-ubi` image has been built locally you ca
 ## Containerize an application
 For a more indepth look at containerizing your application with Open Liberty go to the Open Liberty [guides](https://openliberty.io/guides/).  In particular look at the [containerize](https://openliberty.io/guides/#containerize) guides.
 
+A minimal `Dockerfile` using the open-liberty:beta-checkpoint image would look similar to the following:
+
+```
+FROM open-liberty:beta-checkpoint-ubi
+
+ARG VERBOSE=false
+
+COPY --chown=1001:0 server.xml /config/server.xml
+COPY --chown=1001:0 pingperf.war /config/dropins/pingperf.war
+
+RUN configure.sh
+```
+To build an application image using this `Dockerfile` use something like the following:
+
+```
+podman build -t ping-application .
+```
+
 ## Checkpoint an application in-container
 Once a containerized application image has been created it can be used to checkpoint the Open Liberty server process which has been configured to run the containerized application. The checkpoint can be done at one of the three following spots during the Open Liberty server startup:
 
@@ -52,3 +70,7 @@ This will fail because `criu` needs some elevated privileges in order to be able
 ```
 podman run --cap-add=CHECKPOINT_RESTORE --cap-add=NET_ADMIN --cap-add=SYS_PTRACE --security-opt seccomp=criuRequiredSysCalls.json -v /proc/sys/kernel/ns_last_pid:/proc/sys/kernel/ns_last_pid -p 9080:9080  <application-image-name-checkpoint>
 ```
+
+## Simple Example
+The [pingperf](examples/pingperf) directory contains a very simple REST application called pingperf along with the necessary `Dockerfile` to containerize the application.  It also contains a simple script `build-app.sh` that performs the steps above to build a `pingperf-checkpoint` image.  It also contains a simple `run-app.sh` script for restoring the application process in-container.
+
