@@ -18,7 +18,7 @@ podman build -f beta-image/Dockerfile.ubi.openjdk11 -t open-liberty:beta-checkpo
 ```
 
 # Using open-liberty:beta-checkpoint-ubi Image
-After the `open-liberty:beta-checkpoint-ubi` image has been built locally you can use the following steps the containerize your application and then checkpoint your application and build a layer on top that contains a checkpointed instance of your application.
+After the `open-liberty:beta-checkpoint-ubi` image has been built locally you can use the following steps the containerize an example application and then checkpoint the application and build a layer on top that contains a checkpointed instance of the application.
 ## Containerize an application
 For a more indepth look at containerizing your application with Open Liberty go to the Open Liberty [guides](https://openliberty.io/guides/).  In particular look at the [containerize](https://openliberty.io/guides/#containerize) guides.
 
@@ -29,15 +29,15 @@ FROM open-liberty:beta-checkpoint-ubi
 
 ARG VERBOSE=false
 
-COPY --chown=1001:0 server.xml /config/server.xml
-COPY --chown=1001:0 pingperf.war /config/dropins/pingperf.war
+COPY --chown=1001:0 src/main/liberty/config/server.xml /config/server.xml
+COPY --chown=1001:0 target/guide-rest-intro.war /config/apps/guide-rest-intro.war
 
 RUN configure.sh
 ```
 To build an application image using this `Dockerfile` use something like the following:
 
 ```
-podman build -t ping-application .
+podman build -t rest-intro-application .
 ```
 
 ## Checkpoint an application in-container
@@ -47,7 +47,7 @@ Once a containerized application image has been created it can be used to checkp
 2. deployment - performs the checkpoint after the configured applications have been processed and are ready to start
 3. applications - performs the checkpoint after the configured applications have been started, but before any ports have been opened to accept incoming requests to the application
 
-To perform the checkpoint of an application in-container run the following command, where the <application-image-name> is the image tag used when the applicaiion was containerized and <application-image-name-container> is the name for the temporary container which will be used to checkpoint the application:
+To perform the checkpoint of the application in-container run the following command, where the <application-image-name> is the image tag used when the applicaiion was containerized and <application-image-name-container> is the name for the temporary container which will be used to checkpoint the application:
 ```
 podman run --name <application-image-name-container> --privileged --env WLP_CHECKPOINT=applications <application-image-name>
 ```
@@ -72,5 +72,7 @@ podman run --cap-add=CHECKPOINT_RESTORE --cap-add=NET_ADMIN --cap-add=SYS_PTRACE
 ```
 
 ## Simple Example
-The [pingperf](examples/pingperf) directory contains a very simple REST application called pingperf along with the necessary `Dockerfile` to containerize the application.  It also contains a simple script `build-app.sh` that performs the steps above to build a `pingperf-checkpoint` image.  It also contains a simple `run-app.sh` script for restoring the application process in-container.
+The [rest-intro](examples/rest-intro) directory contains a very simple REST application called rest-intro along with the necessary `Dockerfile` to containerize the application.  It also contains a simple script `build-app.sh` that performs the steps above to build a `rest-intro-checkpoint` image.  It also contains a simple `run-app.sh` script for restoring the application process in-container.
+
+The source for this example was taken from the Open Liberty guide [Creating a RESTful web service](https://openliberty.io/guides/rest-intro.html).
 
