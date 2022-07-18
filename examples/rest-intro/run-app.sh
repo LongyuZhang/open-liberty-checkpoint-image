@@ -8,6 +8,6 @@
 # The extra --security-opt for seccomp systempaths and apparmor
 # are needed if not using the latest runc release
 # that allows mounting of ns_last_pid
-podman run --cap-add=CHECKPOINT_RESTORE --security-opt seccomp=unconfined --security-opt systempaths=unconfined --security-opt apparmor=unconfined -p 9080:9080 --name rest-intro-restore rest-intro-checkpoint; podman rm rest-intro-restore
+podman run --cap-add=CHECKPOINT_RESTORE --cap-add=NET_ADMIN --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --security-opt systempaths=unconfined --security-opt apparmor=unconfined -p 9080:9080 --name rest-intro-restore rest-intro-checkpoint; podman rm rest-intro-restore
 
 
