@@ -47,19 +47,19 @@ Once a containerized application image has been created it can be used to checkp
 2. deployment - performs the checkpoint after the configured applications have been processed and are ready to start
 3. applications - performs the checkpoint after the configured applications have been started, but before any ports have been opened to accept incoming requests to the application
 
-To perform the checkpoint of the application in-container run the following command, where the <application-image-name> is the image tag used when the applicaiion was containerized and <application-image-name-container> is the name for the temporary container which will be used to checkpoint the application:
+To perform the checkpoint of the application in-container run the following command, where the `<application-image-name>` is the image tag used when the applicaiion was containerized and `<application-image-name-container>` is the name for the temporary container which will be used to checkpoint the application:
 ```
 podman run --name <application-image-name-container> --privileged --env WLP_CHECKPOINT=applications <application-image-name>
 ```
 This will start a container with the containerized application running on Open Liberty.  Once Open Liberty starts it will perform a checkpoint at the spot specified by the `WLP_CHECKPOINT` environment variable specified by the `--env` options.  This variable can be set to `features`, `deployment` or `applications`.  Note that `--privileged` is required to perform the checkpoint in-container.  This is only necessary to produce the checkpoing process image which gets stored into the container.  After the checkpoint process image has been produced the container will stop, leaving you with a stopped container that contains the checkpoint process image.
 
 ## Commit a checkpointed application image
-To produce a checkpointed application container image which contains the checkpoint process image run the following command that will commit the container used to run the checkpoint to an application image where <application-image-name-container> is the name used above for the container used to checkpoint and <application-image-name-checkpoint> is the final name you want the checkpointed application container image to be:
+To produce a checkpointed application container image which contains the checkpoint process image run the following command that will commit the container used to run the checkpoint to an application image where `<application-image-name-container>` is the name used above for the container used to checkpoint and `<application-image-name-checkpoint>` is the final name you want the checkpointed application container image to be:
 ```
-podman commit <application-image-name-container> <application-image-name-checkpoint> || exit 1
+podman commit <application-image-name-container> <application-image-name-checkpoint>
 ```
 ## Restore a checkpointed application in-container
-To restore the checkpointed application in-container you run the checkpointed application container image.  Typically that would be done with a command like this, where <application-image-name-checkpoint> is the final name you used to build the checkpointed application container image:
+To restore the checkpointed application in-container you run the checkpointed application container image.  Typically that would be done with a command like this, where `<application-image-name-checkpoint>` is the final name you used to build the checkpointed application container image:
 
 ```
 podman run -it -p 9080:9080 <application-image-name-checkpoint>
@@ -69,6 +69,12 @@ This will fail because `criu` needs some elevated privileges in order to be able
 
 ```
 podman run --cap-add=CHECKPOINT_RESTORE --cap-add=NET_ADMIN --cap-add=SYS_PTRACE --security-opt seccomp=criuRequiredSysCalls.json -v /proc/sys/kernel/ns_last_pid:/proc/sys/kernel/ns_last_pid -p 9080:9080  <application-image-name-checkpoint>
+```
+
+To use the reduced capabilities above you must use `podman` and have a version of `runc` that contains the fix to allow mounting `ns_last_pid` (see https://github.com/opencontainers/runc/pull/3451).  This fix has been backported to `runc` version 1.1.3.  If you are using `docker` instead or you do not have the latest released version of `runc` with the necessary fix then you can run the following instead which opens up additional security options:
+
+```
+podman run --cap-add=CHECKPOINT_RESTORE --cap-add=NET_ADMIN --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --security-opt systempaths=unconfined --security-opt apparmor=unconfined -p 9080:9080 <application-image-name-checkpoint>
 ```
 
 ## Simple Example
